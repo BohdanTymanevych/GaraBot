@@ -2,8 +2,12 @@ import telebot
 from telebot import types
 import sqlite3
 import datetime
+from apscheduler.schedulers.blocking import BlockingScheduler
 
 
+
+
+sched = BlockingScheduler()
 bot = telebot.TeleBot("5472931040:AAHPfwgbzn2OyISPpRLrsUwDhcxzBm-xDWU")
 pereklychka = False
 
@@ -39,12 +43,14 @@ def smerd_checker(message):
 	for user in all_users:
 		bot.send_message(message.chat.id, "@"+user)
 
-
 	markup1 = types.ReplyKeyboardMarkup(row_width=1, one_time_keyboard=True)
 	markup1.add(types.KeyboardButton("Я не смерд"))
 	bot.send_message(message.chat.id, 'Смердите?', reply_markup=markup1)
 	start = datetime.datetime.now()
-	end_time = start + datetime.timedelta(minutes=10)
+	end_time = start + datetime.timedelta(minutes=2)
+
+	sched.add_job(lambda : bot.send_message(message.chat.id, "Перекличку завершено"), trigger="cron", hour=end_time.hour, minute=end_time.minute)
+	sched.start()
 
 
 
@@ -61,6 +67,8 @@ def echo_all(message):
 		markup = types.InlineKeyboardMarkup()
 		markup.add(types.InlineKeyboardButton("Запрошення до буди", url="https://t.me/+Omv5EzIJ8o9jZjky"))
 		bot.send_message(message.chat.id, 'Буда', reply_markup=markup)
+	elif message.text == 'Я не смерд':
+		bot.reply_to(message, 'Мулудєц')
 	else:
 		bot.reply_to(message, message.text)
 
