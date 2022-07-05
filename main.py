@@ -22,7 +22,7 @@ def get_users():
 
 
 
-@bot.message_handler(commands=['start'])
+@bot.message_handler(commands=['registration'])
 def buda_going(message):
 	bot.send_message(message.chat.id, 'Миронцю - професіонал своєї справи.')
 	username = message.from_user.username
@@ -37,17 +37,20 @@ def buda_going(message):
 
 
 
-@bot.message_handler(commands=['Перекличка'])
+@bot.message_handler(commands=['pereklychka'])
 def smerd_checker(message):
 	all_users = get_users()
 	for user in all_users:
 		bot.send_message(message.chat.id, "@"+user)
 
-	markup1 = types.ReplyKeyboardMarkup(row_width=1, one_time_keyboard=True)
-	markup1.add(types.KeyboardButton("Я не смерд"))
+	markup1 = types.InlineKeyboardMarkup(row_width=2)
+	item1 = types.InlineKeyboardButton('Я не смерд', callback_data='ne_smerd')
+	item2 = types.InlineKeyboardButton('Підсмерджую', callback_data='smerd')
+	markup1.add(item1,item2)
 	bot.send_message(message.chat.id, 'Смердите?', reply_markup=markup1)
 	start = datetime.datetime.now()
 	end_time = start + datetime.timedelta(minutes=2)
+
 
 	sched.add_job(lambda : bot.send_message(message.chat.id, "Перекличку завершено"), trigger="cron", hour=end_time.hour, minute=end_time.minute)
 	sched.start()
@@ -67,11 +70,14 @@ def echo_all(message):
 		markup = types.InlineKeyboardMarkup()
 		markup.add(types.InlineKeyboardButton("Запрошення до буди", url="https://t.me/+Omv5EzIJ8o9jZjky"))
 		bot.send_message(message.chat.id, 'Буда', reply_markup=markup)
-	elif message.text == 'Я не смерд':
-		bot.reply_to(message, 'Мулудєц')
 	else:
 		bot.reply_to(message, message.text)
 
+@bot.callback_query_handler(func=lambda call: True)
+def callback_status(call):
+	if call.message:
+		if call.data == 'ne_smerd':
+			print(call.message.from_user.id)
 
 
 
