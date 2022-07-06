@@ -5,11 +5,25 @@ import datetime
 from apscheduler.schedulers.blocking import BlockingScheduler
 
 
-
+def spysok(message_id):
+	all_users = get_users()
+	i = 1
+	bot.send_message(message_id, "Список смердів: ")
+	for person in all_users:
+		if person in arr:
+			pass
+		else:
+			bot.send_message(message_id,f"{i}.{person}")
+			i += 1
+	status_arr.clear()
+	arr.clear()
 
 sched = BlockingScheduler()
 bot = telebot.TeleBot("5472931040:AAHPfwgbzn2OyISPpRLrsUwDhcxzBm-xDWU")
 pereklychka = False
+arr = []
+status_arr = []
+
 
 def get_users():
 	conn = sqlite3.connect("users.db")
@@ -39,23 +53,27 @@ def buda_going(message):
 
 @bot.message_handler(commands=['pereklychka'])
 def smerd_checker(message):
-	all_users = get_users()
-	for user in all_users:
-		bot.send_message(message.chat.id, "@"+user)
+	if len(status_arr) == 0:
+		status_arr.append(1)
+		all_users = get_users()
+		for user in all_users:
+			bot.send_message(message.chat.id, "@"+user)
 
-	markup1 = types.InlineKeyboardMarkup(row_width=2)
-	item1 = types.InlineKeyboardButton('Я не смерд', callback_data='ne_smerd')
-	item2 = types.InlineKeyboardButton('Підсмерджую', callback_data='smerd')
-	markup1.add(item1,item2)
-	msg = bot.send_message(message.chat.id, 'Смердите?', reply_markup=markup1)
-	start = datetime.datetime.now()
-	end_time = start + datetime.timedelta(minutes=3)
+		markup1 = types.InlineKeyboardMarkup(row_width=2)
+		item1 = types.InlineKeyboardButton('Я не смерд', callback_data='ne_smerd')
+		item2 = types.InlineKeyboardButton('Підсмерджую', callback_data='smerd')
+		markup1.add(item1,item2)
+		msg = bot.send_message(message.chat.id, 'Смердите?', reply_markup=markup1)
+		start = datetime.datetime.now()
+		end_time = start + datetime.timedelta(minutes=1)
 
-
-	sched.add_job(lambda : bot.send_message(message.chat.id, "Перекличку завершено"), trigger="cron", hour=end_time.hour, minute=end_time.minute)
-	sched.add_job(lambda : bot.edit_message_text(chat_id=msg.chat.id, message_id=msg.message_id, text='Голосування закрито', reply_markup=None), trigger="cron", hour=end_time.hour, minute=end_time.minute)
-	sched.start()
-
+		sched.add_job(lambda : bot.send_message(message.chat.id, "Перекличку завершено"), trigger="cron", hour=end_time.hour, minute=end_time.minute, second=end_time.second)
+		sched.add_job(lambda : bot.edit_message_text(chat_id=msg.chat.id, message_id=msg.message_id, text='Голосування закрито', reply_markup=None)
+					  , trigger="cron", hour=end_time.hour, minute=end_time.minute, second=end_time.second)
+		sched.add_job(lambda: spysok(message.chat.id), trigger="cron", hour=end_time.hour, minute=end_time.minute, second=end_time.second)
+		sched.start()
+	else:
+		bot.send_message(message.chat.id, "Перекличка вже триває(остап Гей)")
 
 
 
@@ -78,7 +96,8 @@ def echo_all(message):
 def callback_status(call):
 	if call.message:
 		if call.data == 'ne_smerd':
-			print(call.message.from_user.id)
+			if call.from_user.username not in arr:
+				arr.append(call.from_user.username)
 
 
 
