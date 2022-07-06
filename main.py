@@ -45,7 +45,7 @@ def smerd_checker(message):
 
 	markup1 = types.InlineKeyboardMarkup(row_width=2)
 	item1 = types.InlineKeyboardButton('Я не смерд', callback_data='ne_smerd')
-	item2 = types.InlineKeyboardButton('Підсмерджую', cacallback_data='smerd')
+	item2 = types.InlineKeyboardButton('Підсмерджую', callback_data='smerd')
 	markup1.add(item1,item2)
 	msg = bot.send_message(message.chat.id, 'Смердите?', reply_markup=markup1)
 	start = datetime.datetime.now()
@@ -53,8 +53,7 @@ def smerd_checker(message):
 
 
 	sched.add_job(lambda : bot.send_message(message.chat.id, "Перекличку завершено"), trigger="cron", hour=end_time.hour, minute=end_time.minute)
-	sched.add_job(lambda : bot.edit_message_text(chat_id=msg.chat.id, message_id=msg.message_id, text='Голосування закрито',reply_markup=None)
-				  , trigger="cron", hour=end_time.hour, minute=end_time.minute)
+	sched.add_job(lambda : bot.edit_message_text(chat_id=msg.chat.id, message_id=msg.message_id, text='Голосування закрито', reply_markup=None), trigger="cron", hour=end_time.hour, minute=end_time.minute)
 	sched.start()
 
 
@@ -79,7 +78,7 @@ def echo_all(message):
 def callback_status(call):
 	if call.message:
 		if call.data == 'ne_smerd':
-			print(call.message.from_user.username)
+			print(call.message.from_user.id)
 
 
 
