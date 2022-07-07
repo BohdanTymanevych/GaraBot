@@ -93,7 +93,7 @@ def echo_all(message):
 		stakan1 = types.InlineKeyboardButton('Потягнути', callback_data='potagnyv')
 		markup_zabava.add(stakan1)
 
-		bot.send_photo(message.cналтhat.id, open('image001-296.jpg', 'rb'), reply_markup=markup_zabava)
+		bot.send_photo(message.chat.id, open('image001-296.jpg', 'rb'), reply_markup=markup_zabava)
 
 
 
